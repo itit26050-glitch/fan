@@ -1,136 +1,722 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Talk to Jaoka - Rainy.REN</title>
-<style>
-:root{
-  --bg1:#010208; --panel:#060d24;
-  --gold:#d4af37; --gold-l:#f6e27a; --gold-d:#8a6d1c;
-  --text:#dfe6f7; --muted:#8a98bd;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box;margin:0}
-body{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:20px;font-family:"Segoe UI",Tahoma,sans-serif;color:var(--text);
-  background:
-    radial-gradient(ellipse 60% 40% at 20% 10%,rgba(122,77,255,.28),transparent 70%),
-    radial-gradient(ellipse 50% 40% at 85% 85%,rgba(40,120,255,.25),transparent 70%),
-    var(--bg1);
-  overflow-x:hidden;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เจ้าขา ♡</title>
 
-/* ===== ดวงดาวพื้นหลัง ===== */
-.stars,.stars::before,.stars::after{content:"";position:fixed;inset:0;pointer-events:none;background-repeat:repeat}
-.stars{z-index:1;
-  background-image:
-    radial-gradient(1.2px 1.2px at 20px 30px,#fff,transparent),
-    radial-gradient(1px 1px at 90px 80px,#cfe0ff,transparent),
-    radial-gradient(1.5px 1.5px at 150px 20px,#fff,transparent),
-    radial-gradient(1px 1px at 60px 140px,#f6e27a,transparent),
-    radial-gradient(1.2px 1.2px at 180px 120px,#fff,transparent);
-  background-size:200px 180px;animation:twinkle 4s ease-in-out infinite}
-.stars::before{
-  background-image:
-    radial-gradient(1.5px 1.5px at 40px 60px,#fff,transparent),
-    radial-gradient(1px 1px at 130px 110px,#b9c9ff,transparent),
-    radial-gradient(2px 2px at 100px 20px,#f6e27a,transparent);
-  background-size:260px 230px;animation:twinkle 6s ease-in-out infinite reverse}
-.stars::after{
-  inset:auto;top:8%;left:-20%;width:140px;height:2px;
-  background:linear-gradient(90deg,transparent,#fff);
-  transform:rotate(25deg);opacity:0;animation:shoot 7s ease-in infinite 2s}
-@keyframes twinkle{50%{opacity:.35}}
-@keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(25deg)}
-  5%{opacity:1}20%{opacity:0;transform:translate(130vw,60vh) rotate(25deg)}100%{opacity:0}}
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Itim&family=Mali:wght@400;500;600;700&display=swap');
 
-/* ===== หน้าต่างคอนโซลหลัก ===== */
-.window{
-  position:relative;z-index:2;width:100%;max-width:380px;
-  padding:34px 24px 30px;border-radius:18px;overflow:hidden;
-  background:linear-gradient(160deg,#0b1a40,var(--panel) 60%,#03060f);
-  border:2px solid var(--gold);
-  box-shadow:0 0 0 5px #050a1a,0 0 0 6px var(--gold-d),0 0 50px rgba(122,77,255,.3),0 0 30px rgba(212,175,55,.25),inset 0 0 40px rgba(0,0,0,.6);
-}
-.window::before{content:"";position:absolute;inset:8px;border:1px solid rgba(212,175,55,.45);border-radius:12px;pointer-events:none;z-index:1}
-.corner{position:absolute;z-index:2;width:22px;height:22px;border:2px solid var(--gold-l)}
-.tl{top:14px;left:14px;border-right:0;border-bottom:0}
-.tr{top:14px;right:14px;border-left:0;border-bottom:0}
-.bl{bottom:14px;left:14px;border-right:0;border-top:0}
-.br{bottom:14px;right:14px;border-left:0;border-top:0}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-h1{
-  text-align:center;font-size:2.2rem;letter-spacing:2px;
-  background:linear-gradient(180deg,var(--gold-l),var(--gold) 55%,var(--gold-d));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 0 12px rgba(212,175,55,.45));
-}
-.sub{text-align:center;color:var(--muted);font-size:.8rem;margin-top:6px;letter-spacing:3px;text-transform:uppercase;}
-.line{height:1px;margin:18px auto 20px;width:70%;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+    body {
+      min-height: 100vh;
+      font-family: "Mali", sans-serif;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255,255,255,.9) 0 4%, transparent 5%),
+        radial-gradient(circle at 85% 20%, rgba(255,255,255,.7) 0 3%, transparent 4%),
+        linear-gradient(135deg, #ffd8eb, #f8e0ff 48%, #dceeff);
+      color: #69536f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
 
-/* ===== วงเวียนเวทมนตร์ตรงกลาง ===== */
-.sigil{display:block;width:140px;height:140px;margin:0 auto 24px;
-  filter:drop-shadow(0 0 14px rgba(127,166,255,.7))}
-.sigil .r1{transform-origin:100px 100px;animation:spin 28s linear infinite}
-.sigil .r2{transform-origin:100px 100px;animation:spin 18s linear infinite reverse}
-.sigil .core{transform-origin:100px 100px;animation:pulse 3.2s ease-in-out infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse{50%{transform:scale(1.15);opacity:.8}}
+    /* ดาว / หัวใจพื้นหลัง */
+    body::before,
+    body::after {
+      position: fixed;
+      font-family: serif;
+      color: rgba(255,255,255,.8);
+      pointer-events: none;
+    }
 
-/* ===== ปุ่ม START TALKING ===== */
-.btn-talk{
-  display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;
-  width:100%;padding:15px;border-radius:12px;font-weight:700;letter-spacing:2px;
-  color:#1a1303;background:linear-gradient(180deg,var(--gold-l),var(--gold) 60%,var(--gold-d));
-  border:1px solid var(--gold-l);box-shadow:0 4px 22px rgba(212,175,55,.4);transition:transform .15s, box-shadow .15s;
-}
-.btn-talk:hover{transform:translateY(-2px);box-shadow:0 6px 26px rgba(212,175,55,.6)}
-.btn-talk:active{transform:scale(.97)}
-</style>
+    body::before {
+      content: "♡  ✦  ♡  ⋆  ✧  ♡";
+      font-size: 42px;
+      top: 8%;
+      left: 5%;
+      transform: rotate(-12deg);
+    }
+
+    body::after {
+      content: "✦  ♡  ⋆  ♡  ✧";
+      font-size: 34px;
+      right: 5%;
+      bottom: 10%;
+      transform: rotate(10deg);
+    }
+
+    .game-window {
+      width: min(92%, 720px);
+      min-height: 650px;
+      background: rgba(255,255,255,.72);
+      border: 3px solid rgba(255,255,255,.95);
+      border-radius: 30px;
+      box-shadow:
+        0 25px 70px rgba(164, 113, 172, .25),
+        inset 0 0 0 2px rgba(244,184,221,.5);
+      backdrop-filter: blur(15px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* แถบด้านบน */
+    .window-bar {
+      height: 58px;
+      padding: 0 22px;
+      background: linear-gradient(90deg, #f7a9cc, #c9b2f3, #a9d9f5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      border-bottom: 2px solid rgba(255,255,255,.7);
+    }
+
+    .window-title {
+      font-family: "Itim", cursive;
+      font-size: 22px;
+      text-shadow: 0 2px 4px rgba(120,80,130,.2);
+    }
+
+    .window-buttons {
+      display: flex;
+      gap: 7px;
+    }
+
+    .window-buttons span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.8);
+    }
+
+    /* หน้าแรก */
+    .screen {
+      min-height: 592px;
+      padding: 45px 35px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: fadeIn .5s ease;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ffb5d5, #c8b5f4);
+      border: 5px solid white;
+      box-shadow: 0 10px 25px rgba(176, 126, 184, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 47px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .avatar::after {
+      content: "♡";
+      position: absolute;
+      right: -7px;
+      top: -10px;
+      font-size: 25px;
+      color: #ff8fc1;
+    }
+
+    .hello {
+      font-family: "Itim", cursive;
+      font-size: clamp(32px, 6vw, 48px);
+      color: #9a669e;
+      margin-bottom: 12px;
+    }
+
+    .message {
+      max-width: 500px;
+      font-size: 18px;
+      line-height: 1.9;
+      color: #79667e;
+      margin-bottom: 30px;
+    }
+
+    .message strong {
+      color: #e98eb8;
+    }
+
+    .start-button {
+      border: none;
+      cursor: pointer;
+      font-family: "Mali", sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      padding: 14px 38px;
+      border-radius: 50px;
+      background: linear-gradient(100deg, #f49ac3, #bca0ed);
+      box-shadow: 0 8px 20px rgba(192, 128, 190, .3);
+      transition: .25s ease;
+    }
+
+    .start-button:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 12px 25px rgba(192, 128, 190, .4);
+    }
+
+    .start-button:active {
+      transform: scale(.97);
+    }
+
+    /* BLOG */
+    .blog-screen {
+      display: none;
+      padding: 28px;
+      min-height: 592px;
+      animation: slideIn .5s ease;
+    }
+
+    .blog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .blog-title {
+      font-family: "Itim", cursive;
+      font-size: 34px;
+      color: #9a669e;
+    }
+
+    .date {
+      color: #a987ad;
+      font-size: 14px;
+      background: rgba(255,255,255,.75);
+      padding: 8px 14px;
+      border-radius: 20px;
+    }
+
+    /* ข้อความของเจ้าขา */
+    .jaoka-message {
+      background: linear-gradient(135deg, #fff5fa, #f7f0ff);
+      border: 2px solid white;
+      border-radius: 20px;
+      padding: 17px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 18px rgba(177, 129, 179, .12);
+      position: relative;
+    }
+
+    .jaoka-message::before {
+      content: "";
+      position: absolute;
+      left: 20px;
+      bottom: -9px;
+      width: 17px;
+      height: 17px;
+      background: #fff5fa;
+      border-right: 2px solid white;
+      border-bottom: 2px solid white;
+      transform: rotate(45deg);
+    }
+
+    .jaoka-name {
+      color: #e68bb5;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .jaoka-text {
+      color: #725e76;
+      line-height: 1.7;
+    }
+
+    /* กล่องเขียน */
+    .journal {
+      background: rgba(255,255,255,.9);
+      border: 2px solid #f3d5e8;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 10px 30px rgba(163, 118, 169, .12);
+    }
+
+    .journal-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9c72a0;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 245px;
+      resize: vertical;
+      border: 2px dashed #e8c9e3;
+      border-radius: 17px;
+      padding: 18px;
+      outline: none;
+      background: #fffafd;
+      color: #68576d;
+      font-family: "Mali", sans-serif;
+      font-size: 16px;
+      line-height: 1.8;
+      transition: .2s;
+    }
+
+    textarea::placeholder {
+      color: #c4a9c3;
+    }
+
+    textarea:focus {
+      border-color: #cba6e7;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(203,166,231,.12);
+    }
+
+    .journal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      gap: 10px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #b196b5;
+    }
+
+    .save-button {
+      border: none;
+      cursor: pointer;
+      font-family: "Mali", sans-serif;
+      color: white;
+      font-weight: 600;
+      padding: 11px 23px;
+      border-radius: 30px;
+      background: linear-gradient(100deg, #efa0c4, #b99ce9);
+      transition: .25s;
+    }
+
+    .save-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .back-button {
+      margin-top: 18px;
+      border: none;
+      background: transparent;
+      color: #a17fa7;
+      font-family: "Mali", sans-serif;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .back-button:hover {
+      color: #e28ab4;
+    }
+
+    /* popup หลังบันทึก */
+    .saved-note {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(91, 65, 100, .2);
+      backdrop-filter: blur(5px);
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .saved-box {
+      width: min(88%, 390px);
+      padding: 30px;
+      background: white;
+      border: 4px solid #f6d9eb;
+      border-radius: 28px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(100,70,110,.25);
+    }
+
+    .saved-box .heart {
+      font-size: 45px;
+      margin-bottom: 10px;
+    }
+
+    .saved-box h2 {
+      font-family: "Itim", cursive;
+      font-size: 30px;
+      color: #a06ba2;
+      margin-bottom: 10px;
+    }
+
+    .saved-box p {
+      line-height: 1.8;
+      color: #78637c;
+      margin-bottom: 20px;
+    }
+
+    .close-popup {
+      border: none;
+      background: #e99bc0;
+      color: white;
+      border-radius: 30px;
+      padding: 10px 28px;
+      font-family: "Mali", sans-serif;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .game-window {
+        width: 94%;
+        min-height: 90vh;
+        border-radius: 24px;
+      }
+
+      .screen {
+        padding: 35px 22px;
+        min-height: calc(90vh - 58px);
+      }
+
+      .blog-screen {
+        padding: 22px 18px;
+      }
+
+      .blog-title {
+        font-size: 29px;
+      }
+
+      .date {
+        font-size: 11px;
+      }
+
+      textarea {
+        min-height: 220px;
+      }
+
+      .journal-footer {
+        align-items: flex-end;
+        flex-direction: column;
+      }
+
+      .save-button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="stars"></div>
 
-<main class="window">
-  <span class="corner tl"></span><span class="corner tr"></span>
-  <span class="corner bl"></span><span class="corner br"></span>
+  <main class="game-window">
 
-  <header>
-    <h1>Rainy.REN</h1>
-    <p class="sub">Talk to Jaoka</p>
-    <div class="line"></div>
-  </header>
+    <!-- TOP BAR -->
+    <div class="window-bar">
+      <div class="window-title">♡ เจ้าขา's little place</div>
 
-  <svg class="sigil" viewBox="0 0 200 200" aria-hidden="true">
-    <defs>
-      <radialGradient id="g" cx="50%" cy="50%" r="50%">
-        <stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#f6e27a"/><stop offset="1" stop-color="#7fa6ff" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <g class="r1" fill="none" stroke="#d4af37" stroke-width="1.5">
-      <circle cx="100" cy="100" r="92" stroke-dasharray="3 7"/>
-      <circle cx="100" cy="100" r="80"/>
-      <circle cx="100" cy="8" r="4" fill="#f6e27a"/><circle cx="192" cy="100" r="3" fill="#7fa6ff"/>
-      <circle cx="20" cy="100" r="3" fill="#f6e27a"/>
-    </g>
-    <g class="r2" fill="none" stroke="#7fa6ff" stroke-width="1.2">
-      <polygon points="100,28 172,100 100,172 28,100" stroke="#d4af37"/>
-      <polygon points="100,28 172,100 100,172 28,100" transform="rotate(45 100 100)"/>
-      <circle cx="100" cy="100" r="46" stroke-dasharray="2 5"/>
-    </g>
-    <g class="core">
-      <circle cx="100" cy="100" r="34" fill="url(#g)"/>
-      <path d="M100 70 L106 94 L130 100 L106 106 L100 130 L94 106 L70 100 L94 94 Z" fill="#fff"/>
-    </g>
-  </svg>
+      <div class="window-buttons">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
 
-  <!-- ปุ่มกด Start Talking (สามารถเปลี่ยนลิงก์ตรง href="ใส่ลิงก์แชทตรงนี้" ได้เลย) -->
-  <a href="#" class="btn-talk">START TALKING</a>
-</main>
+
+    <!-- =========================
+         หน้าเริ่มต้น
+    ========================== -->
+    <section class="screen" id="homeScreen">
+
+      <div class="avatar">🌷</div>
+
+      <h1 class="hello">ยินดีต้อนรับนะ ♡</h1>
+
+      <p class="message">
+        ที่นี่เป็นพื้นที่เล็ก ๆ ของเรา<br>
+        ถ้าวันนี้เหนื่อย ถ้าวันนี้มีอะไรอยากพูด<br>
+        หรือแค่อยากเล่าเรื่องเล็ก ๆ ให้ใครสักคนฟัง...
+        <br><br>
+        <strong>เจ้าขา</strong> อยู่ตรงนี้นะ
+      </p>
+
+      <button class="start-button" onclick="openJournal()">
+        เล่าเรื่องให้เจ้าขาฟัง ♡
+      </button>
+
+    </section>
+
+
+    <!-- =========================
+         หน้า BLOG / JOURNAL
+    ========================== -->
+    <section class="blog-screen" id="blogScreen">
+
+      <div class="blog-header">
+        <h1 class="blog-title">วันนี้ของเรา ♡</h1>
+
+        <div class="date" id="todayDate"></div>
+      </div>
+
+
+      <!-- ข้อความสุ่มของเจ้าขา -->
+      <div class="jaoka-message">
+
+        <div class="jaoka-name">
+          เจ้าขา · jaoka ♡
+        </div>
+
+        <div class="jaoka-text" id="jaokaMessage">
+          วันนี้มีอะไรอยากเล่าไหม
+        </div>
+
+      </div>
+
+
+      <!-- พื้นที่เขียน -->
+      <div class="journal">
+
+        <div class="journal-label">
+          📝 วันนี้เราเป็นยังไงบ้าง...
+        </div>
+
+        <textarea
+          id="journalText"
+          placeholder="ค่อย ๆ เล่าได้นะ ไม่ต้องเรียบเรียงก็ได้...
+เขียนอะไรก็ได้ที่อยู่ในใจของเรา
+
+วันนี้รู้สึกยังไง
+มีอะไรเกิดขึ้นบ้าง
+มีอะไรที่อยากให้เจ้าขารู้
+หรือถ้าไม่รู้จะเริ่มยังไง ก็พิมพ์ไปเรื่อย ๆ ได้เลย ♡"
+        ></textarea>
+
+        <div class="journal-footer">
+
+          <div class="hint">
+            ทุกความรู้สึกของเรามีความหมาย ♡
+          </div>
+
+          <button class="save-button" onclick="saveJournal()">
+            เก็บเรื่องนี้ไว้ ♡
+          </button>
+
+        </div>
+
+      </div>
+
+      <button class="back-button" onclick="goHome()">
+        ← กลับไปหน้าหลัก
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       POPUP
+  ========================== -->
+  <div class="saved-note" id="savedPopup">
+
+    <div class="saved-box">
+
+      <div class="heart">💗</div>
+
+      <h2>เจ้าขาอ่านแล้วนะ</h2>
+
+      <p>
+        ขอบคุณที่เล่าให้ฟังนะ<br>
+        ไม่ว่าจะเป็นเรื่องดีหรือเรื่องที่ทำให้เหนื่อย<br>
+        เราไม่จำเป็นต้องเก็บทุกอย่างไว้คนเดียวเลย
+      </p>
+
+      <button class="close-popup" onclick="closePopup()">
+        กลับไปเขียนต่อ ♡
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    /* --------------------------------
+       ข้อความสุ่มของ "เจ้าขา"
+    -------------------------------- */
+
+    const jaokaMessages = [
+      "วันนี้เค้าทำตัวไม่ดีรึเปล่า มาบอกได้นะ",
+      "วันนี้มีอะไรอยากเล่าไหม",
+      "วันนี้เหนื่อยตรงไหนมาบ้าง เล่าให้เค้าฟังได้นะ",
+      "มีอะไรที่อยากให้เจ้าขารู้เกี่ยวกับวันนี้ไหม",
+      "วันนี้เป็นยังไงบ้าง เล่าให้เค้าฟังหน่อยได้ไหม",
+      "มีเรื่องอะไรที่ยังค้างอยู่ในใจรึเปล่า",
+      "วันนี้มีอะไรทำให้ยิ้มได้บ้างไหม",
+      "ถ้าวันนี้ไม่โอเค ก็เล่าให้เค้าฟังได้นะ",
+      "วันนี้อยากให้เค้าแก้อะไรตรงไหน บอกเค้าได้เลยนะ",
+      "มีอะไรที่อยากระบายออกมาบ้างไหม",
+      "วันนี้เค้าดูแลเราดีพอรึยังนะ",
+      "ถ้ามีอะไรอยากพูดกับเค้า พิมพ์ตรงนี้ได้เลยนะ ♡"
+    ];
+
+
+    /* --------------------------------
+       เปิดหน้า Blog
+    -------------------------------- */
+
+    function openJournal() {
+
+      document.getElementById("homeScreen").style.display = "none";
+
+      document.getElementById("blogScreen").style.display = "block";
+
+      // สุ่มข้อความใหม่ทุกครั้งที่เข้าหน้า Blog
+      const randomIndex = Math.floor(
+        Math.random() * jaokaMessages.length
+      );
+
+      document.getElementById("jaokaMessage").textContent =
+        jaokaMessages[randomIndex];
+
+      setDate();
+
+      // focus ช่องเขียน
+      setTimeout(() => {
+        document.getElementById("journalText").focus();
+      }, 400);
+    }
+
+
+    /* --------------------------------
+       กลับหน้าหลัก
+    -------------------------------- */
+
+    function goHome() {
+
+      document.getElementById("blogScreen").style.display = "none";
+
+      document.getElementById("homeScreen").style.display = "flex";
+    }
+
+
+    /* --------------------------------
+       วันที่
+    -------------------------------- */
+
+    function setDate() {
+
+      const now = new Date();
+
+      const options = {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      };
+
+      document.getElementById("todayDate").textContent =
+        now.toLocaleDateString("th-TH", options);
+    }
+
+
+    /* --------------------------------
+       บันทึก
+    -------------------------------- */
+
+    function saveJournal() {
+
+      const text =
+        document.getElementById("journalText").value.trim();
+
+      if (!text) {
+
+        document.getElementById("journalText").focus();
+
+        document.getElementById("journalText").placeholder =
+          "เขียนอะไรสักนิดก็ได้นะ... เจ้าขาอยากฟัง ♡";
+
+        return;
+      }
+
+      /*
+        ตอนนี้เป็น Demo Front-end
+        สามารถต่อ Firebase / Supabase / Backend
+        เพื่อบันทึกข้อความจริงได้ภายหลัง
+      */
+
+      localStorage.setItem(
+        "jaoka_journal",
+        text
+      );
+
+      document.getElementById("savedPopup").style.display = "flex";
+    }
+
+
+    /* --------------------------------
+       ปิด Popup
+    -------------------------------- */
+
+    function closePopup() {
+
+      document.getElementById("savedPopup").style.display = "none";
+    }
+
+
+    /* --------------------------------
+       ESC ปิด Popup
+    -------------------------------- */
+
+    document.addEventListener("keydown", function(event) {
+
+      if (
+        event.key === "Escape" &&
+        document.getElementById("savedPopup").style.display === "flex"
+      ) {
+
+        closePopup();
+
+      }
+
+    });
+
+  </script>
+
 </body>
 </html>
