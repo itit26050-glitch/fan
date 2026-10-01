@@ -688,6 +688,150 @@
 
 
     /* ==================================================
+       SWIPE ACTIONS — จดหมาย
+    ================================================== */
+    .letter-swipe-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      margin-bottom: 12px;
+    }
+    .letter-actions {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      transform: translateX(100%);
+      transition: transform .25s ease;
+      background: rgba(255,255,255,.65);
+    }
+    .letter-swipe-wrapper.swiped .letter-actions {
+      transform: translateX(0);
+    }
+    .letter-swipe-wrapper.swiped .letter-card {
+      transform: translateX(-145px);
+    }
+    .letter-card {
+      position: relative;
+      z-index: 2;
+      transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+      margin: 0;
+    }
+    /* ปุ่ม action */
+    .letter-action {
+      width: 52px;
+      height: 52px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      transition: .2s ease;
+      box-shadow:
+        0 4px 10px rgba(100,70,110,.12);
+    }
+    /* ถังขยะ — แดงพาสเทล */
+    .delete-action {
+      background: #f6aeb7;
+      color: white;
+    }
+    .delete-action:hover {
+      background: #ef919d;
+      transform: scale(1.05);
+    }
+    /* แก้ไข — ฟ้าพาสเทล */
+    .edit-action {
+      background: #a9d9f2;
+      color: white;
+    }
+    .edit-action:hover {
+      background: #8fcbe9;
+      transform: scale(1.05);
+    }
+
+
+    /* ==================================================
+       EDIT MODAL
+    ================================================== */
+    .edit-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 250;
+      background:
+        rgba(94,68,103,.25);
+      backdrop-filter: blur(7px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .edit-box {
+      width: min(650px, 95vw);
+      background:
+        linear-gradient(
+          145deg,
+          #fffafd,
+          #faf4ff
+        );
+      border: 4px solid #d9edf7;
+      border-radius: 28px;
+      padding: 25px;
+      box-shadow:
+        0 25px 70px
+        rgba(100,70,110,.25);
+      animation: modalIn .3s ease;
+    }
+    .edit-title {
+      font-family: "Itim", cursive;
+      color: #79a9c1;
+      font-size: 30px;
+      margin-bottom: 15px;
+    }
+    .edit-box textarea {
+      min-height: 250px;
+      width: 100%;
+      border:
+        2px dashed #b9dced;
+      background: white;
+    }
+    .edit-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .cancel-edit {
+      border: none;
+      background: #eadfeb;
+      color: #907899;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-family: "Mali", sans-serif;
+      cursor: pointer;
+    }
+    .save-edit {
+      border: none;
+      background: #a9d9f2;
+      color: white;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-family: "Mali", sans-serif;
+      cursor: pointer;
+    }
+    .save-edit:hover {
+      background: #8fcbe9;
+    }
+
+
+    /* ==================================================
        LETTER READING MODAL
     ================================================== */
 
@@ -1292,6 +1436,18 @@
       .comment-button {
         width: 100%;
       }
+
+      .letter-actions {
+        gap: 5px;
+        padding: 6px;
+      }
+      .letter-action {
+        width: 48px;
+        height: 48px;
+      }
+      .letter-swipe-wrapper.swiped .letter-card {
+        transform: translateX(-130px);
+      }
     }
 
   </style>
@@ -1639,6 +1795,41 @@
 
     </div>
 
+  </div>
+
+
+
+  <!-- ==================================================
+       EDIT LETTER MODAL
+  ================================================== -->
+  <div
+    class="edit-modal"
+    id="editModal"
+  >
+    <div class="edit-box">
+      <h2 class="edit-title">
+        ✏️ แก้ไขจดหมาย
+      </h2>
+      <textarea
+        id="editLetterText"
+        maxlength="2000"
+        placeholder="เขียนตรงนี้เย้ยย"
+      ></textarea>
+      <div class="edit-buttons">
+        <button
+          class="cancel-edit"
+          onclick="closeEditModal()"
+        >
+          ยกเลิก
+        </button>
+        <button
+          class="save-edit"
+          onclick="saveEditedLetter()"
+        >
+          บันทึกการแก้ไข ♡
+        </button>
+      </div>
+    </div>
   </div>
 
 
@@ -2098,6 +2289,66 @@
       sortedLetters.forEach(
         letter => {
 
+          /* =========================
+             SWIPE LETTER
+          ========================= */
+          const wrapper =
+            document.createElement("div");
+          wrapper.className =
+            "letter-swipe-wrapper";
+
+          /* =========================
+             ACTION BUTTONS
+          ========================= */
+          const actions =
+            document.createElement("div");
+          actions.className =
+            "letter-actions";
+
+          /* ปุ่มแก้ไข */
+          const editButton =
+            document.createElement("button");
+          editButton.className =
+            "letter-action edit-action";
+          editButton.innerHTML =
+            "✏️";
+          editButton.title =
+            "แก้ไข";
+          editButton.onclick =
+            function(event) {
+              event.stopPropagation();
+              openEditModal(
+                letter.id
+              );
+            };
+
+          /* ปุ่มลบ */
+          const deleteButton =
+            document.createElement("button");
+          deleteButton.className =
+            "letter-action delete-action";
+          deleteButton.innerHTML =
+            "🗑️";
+          deleteButton.title =
+            "ลบ";
+          deleteButton.onclick =
+            function(event) {
+              event.stopPropagation();
+              deleteLetterById(
+                letter.id
+              );
+            };
+
+          actions.appendChild(
+            editButton
+          );
+          actions.appendChild(
+            deleteButton
+          );
+
+          /* =========================
+             LETTER BUTTON
+          ========================= */
           const button =
             document.createElement(
               "button"
@@ -2108,10 +2359,25 @@
             "letter-card";
 
 
-          button.onclick = () =>
-            openLetter(
-              letter.id
-            );
+          button.onclick =
+            () => {
+              /*
+                ถ้าปัดอยู่ ให้ปิดก่อน
+              */
+              if (
+                wrapper.classList.contains(
+                  "swiped"
+                )
+              ) {
+                wrapper.classList.remove(
+                  "swiped"
+                );
+                return;
+              }
+              openLetter(
+                letter.id
+              );
+            };
 
 
           const icon =
@@ -2192,8 +2458,78 @@
           );
 
 
-          list.appendChild(
+          wrapper.appendChild(
+            actions
+          );
+          wrapper.appendChild(
             button
+          );
+          list.appendChild(
+            wrapper
+          );
+
+
+          /* ==================================================
+             TOUCH SWIPE
+          ================================================== */
+          let startX = 0;
+          let currentX = 0;
+          let isDragging = false;
+
+          button.addEventListener(
+            "touchstart",
+            function(event) {
+              startX =
+                event.touches[0].clientX;
+              isDragging = true;
+            },
+            { passive: true }
+          );
+
+          button.addEventListener(
+            "touchmove",
+            function(event) {
+              if (!isDragging) return;
+              currentX =
+                event.touches[0].clientX;
+              const distance =
+                currentX - startX;
+              /*
+                ปัดซ้ายเท่านั้น
+              */
+              if (
+                distance < -20
+              ) {
+                button.style.transform =
+                  `translateX(${Math.max(
+                    distance,
+                    -145
+                  )}px)`;
+              }
+            },
+            { passive: true }
+          );
+
+          button.addEventListener(
+            "touchend",
+            function() {
+              isDragging = false;
+              const distance =
+                currentX - startX;
+              if (
+                distance < -60
+              ) {
+                wrapper.classList.add(
+                  "swiped"
+                );
+              } else {
+                wrapper.classList.remove(
+                  "swiped"
+                );
+              }
+              button.style.transform =
+                "";
+            }
           );
 
         }
@@ -2616,11 +2952,190 @@
           closeLetter();
 
           closePopup();
+          closeEditModal();
 
         }
 
       }
     );
+
+
+
+    /* ==================================================
+       DELETE LETTER BY ID
+    ================================================== */
+    function deleteLetterById(id) {
+      const confirmed =
+        confirm(
+          "แน่ใจนะว่าจะลบจดหมายนี้?\n\ncomment ทั้งหมดในจดหมายนี้จะถูกลบไปด้วย"
+        );
+      if (!confirmed) {
+        return;
+      }
+      let letters =
+        getLetters();
+      /*
+        ลบทั้งจดหมาย
+        ดังนั้น comments ที่อยู่ข้างใน
+        จะถูกลบไปพร้อมกันอัตโนมัติ
+      */
+      letters =
+        letters.filter(
+          letter =>
+            letter.id !== id
+        );
+      saveLetters(
+        letters
+      );
+      /*
+        ถ้าจดหมายที่กำลังเปิดอยู่
+        เป็นฉบับเดียวกับที่ลบ
+      */
+      if (
+        currentLetterId === id
+      ) {
+        closeLetter();
+      }
+      renderLetters();
+    }
+
+
+    /* ==================================================
+       OPEN EDIT MODAL
+    ================================================== */
+    let editingLetterId = null;
+    function openEditModal(id) {
+      const letters =
+        getLetters();
+      const letter =
+        letters.find(
+          item =>
+            item.id === id
+        );
+      if (!letter) {
+        return;
+      }
+      editingLetterId =
+        id;
+      /*
+        เอาข้อความเดิมมาใส่
+        โดยไม่ trim หรือแก้ไข
+      */
+      document.getElementById(
+        "editLetterText"
+      ).value =
+        letter.content;
+      document.getElementById(
+        "editModal"
+      ).style.display =
+        "flex";
+      setTimeout(() => {
+        document.getElementById(
+          "editLetterText"
+        ).focus();
+      }, 100);
+    }
+
+
+    /* ==================================================
+       SAVE EDIT
+    ================================================== */
+    function saveEditedLetter() {
+      if (!editingLetterId) {
+        return;
+      }
+      const textarea =
+        document.getElementById(
+          "editLetterText"
+        );
+      const newText =
+        textarea.value;
+      /*
+        ไม่ trim
+        เพื่อรักษาข้อความตามที่พิมพ์
+      */
+      if (
+        newText.length === 0
+      ) {
+        textarea.focus();
+        return;
+      }
+      if (
+        newText.length > 2000
+      ) {
+        alert(
+          "ข้อความยาวเกิน 2000 ตัวอักษรนะ 🐽"
+        );
+        return;
+      }
+      const letters =
+        getLetters();
+      const letter =
+        letters.find(
+          item =>
+            item.id ===
+            editingLetterId
+        );
+      if (!letter) {
+        return;
+      }
+      /*
+        แก้เฉพาะ content
+        วันที่และ comment เดิม
+        จะยังอยู่เหมือนเดิม
+      */
+      letter.content =
+        newText;
+      saveLetters(
+        letters
+      );
+      closeEditModal();
+      renderLetters();
+      /*
+        ถ้ากำลังเปิดจดหมายฉบับนี้อยู่
+        ให้ refresh เนื้อหาด้วย
+      */
+      if (
+        currentLetterId ===
+        editingLetterId
+      ) {
+        document.getElementById(
+          "letterContent"
+        ).textContent =
+          newText;
+      }
+    }
+
+
+    /* ==================================================
+       CLOSE EDIT MODAL
+    ================================================== */
+    function closeEditModal() {
+      document.getElementById(
+        "editModal"
+      ).style.display =
+        "none";
+      editingLetterId =
+        null;
+    }
+
+
+    /* ==================================================
+       CLICK OUTSIDE EDIT MODAL
+    ================================================== */
+    document
+      .getElementById("editModal")
+      .addEventListener(
+        "click",
+        function(event) {
+          if (
+            event.target ===
+            this
+          ) {
+            closeEditModal();
+          }
+        }
+      );
 
 
 
