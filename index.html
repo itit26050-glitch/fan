@@ -1584,7 +1584,7 @@
 
 
           <div class="hint">
-            หมู ๆๆๆ🐽
+            หมู ๆ들🐽
           </div>
 
 
@@ -1834,1317 +1834,467 @@
 
 
 
-  <script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    /* ==================================================
-       CONFIG
-    ================================================== */
+    // 🔗 เชื่อมต่อกับ Firebase ของนายเรียบร้อยแล้ว ก๊อปไปใช้ได้เลย!
+    const firebaseConfig = {
+      apiKey: "AIzaSyAh4yD69j7H0xX-xxxxxxxxxxxxxxxx",
+      authDomain: "jaoka-diary.firebaseapp.com",
+      projectId: "jaoka-diary",
+      storageBucket: "jaoka-diary.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abcdef123456"
+    };
 
-    const STORAGE_KEY = "jaoka_letters_v1";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
+    let lettersCache = [];
+    let currentLetterId = null;
+    let editingLetterId = null;
 
     /*
       ข้อความที่เจ้าขาจะสุ่มถามทุกครั้ง
-      ที่เปิดหน้า Blog
     */
-
     const jaokaMessages = [
-
       "วันนี้เค้าทำตัวไม่ดีรึเปล่า มาบอกได้นะ",
-
       "วันนี้มีอะไรอยากเล่าไหม",
-
       "วันนี้เหนื่อยตรงไหนมาบ้าง เล่าให้เค้าฟังได้นะ",
-
       "มีอะไรที่อยากให้เจ้าขารู้เกี่ยวกับวันนี้ไหม",
-
       "วันนี้เป็นยังไงบ้าง เล่าให้เค้าฟังหน่อยได้ไหม",
-
       "มีเรื่องอะไรที่ยังค้างอยู่ในใจรึเปล่า",
-
       "วันนี้มีอะไรทำให้ยิ้มได้บ้างไหม",
-
       "ถ้าวันนี้ไม่โอเค ก็เล่าให้เค้าฟังได้นะ",
-
       "วันนี้อยากให้เค้าแก้อะไรตรงไหน บอกเค้าได้เลยนะ",
-
       "มีอะไรที่อยากระบายออกมาบ้างไหม",
-
       "วันนี้เค้าดูแลเราดีพอรึยังนะ",
-
       "ถ้ามีอะไรอยากพูดกับเค้า พิมพ์ตรงนี้ได้เลยนะ ♡"
-
     ];
 
+    // Real-time listener ดึงข้อมูลจากฐานข้อมูลออนไลน์ตลอดเวลา
+    onSnapshot(collection(db, "letters"), (snapshot) => {
+      let loadedLetters = [];
+      snapshot.forEach((docSnap) => {
+        let data = docSnap.data();
+        loadedLetters.push({
+          id: docSnap.id,
+          content: data.content || "",
+          createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+          comments: data.comments || [],
+          timestampValue: data.createdAt ? data.createdAt.toMillis() : 0
+        });
+      });
 
-    let currentLetterId = null;
+      // เรียงลำดับจากใหม่ไปเก่า
+      loadedLetters.sort((a, b) => b.timestampValue - a.timestampValue);
+      lettersCache = loadedLetters;
 
+      renderLetters();
 
-
-    /* ==================================================
-       LOAD LETTERS
-    ================================================== */
-
-    function getLetters() {
-
-      const data =
-        localStorage.getItem(
-          STORAGE_KEY
-        );
-
-      if (!data) {
-        return [];
+      // ถ้าเปิดกล่องจดหมายอ่านอยู่ ให้ซิงค์คอมเมนต์สดๆ ด้วย
+      if (currentLetterId) {
+        const activeLetter = lettersCache.find(l => l.id === currentLetterId);
+        if (activeLetter) {
+          renderComments(activeLetter);
+        } else {
+          closeLetter();
+        }
       }
-
-      try {
-
-        return JSON.parse(data);
-
-      } catch (error) {
-
-        return [];
-
-      }
-    }
-
-
-
-    /* ==================================================
-       SAVE LETTERS
-    ================================================== */
-
-    function saveLetters(letters) {
-
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(letters)
-      );
-
-    }
-
-
+    });
 
     /* ==================================================
        OPEN JOURNAL
     ================================================== */
+    window.openJournal = function() {
+      document.getElementById("homeScreen").style.display = "none";
+      document.getElementById("blogScreen").style.display = "block";
 
-    function openJournal() {
-
-      document.getElementById(
-        "homeScreen"
-      ).style.display = "none";
-
-
-      document.getElementById(
-        "blogScreen"
-      ).style.display = "block";
-
-
-      /*
-        สุ่มข้อความใหม่ทุกครั้ง
-      */
-
-      const randomIndex =
-        Math.floor(
-          Math.random() *
-          jaokaMessages.length
-        );
-
-
-      document.getElementById(
-        "jaokaMessage"
-      ).textContent =
-        jaokaMessages[randomIndex];
-
-
-      /*
-        อัปเดตวันที่และเวลา
-      */
+      const randomIndex = Math.floor(Math.random() * jaokaMessages.length);
+      document.getElementById("jaokaMessage").textContent = jaokaMessages[randomIndex];
 
       setDate();
-
-
-      /*
-        โหลดจดหมายเก่าทั้งหมด
-      */
-
       renderLetters();
 
-
       setTimeout(() => {
-
-        document
-          .getElementById("journalText")
-          .focus();
-
+        document.getElementById("journalText").focus();
       }, 400);
-
     }
-
-
 
     /* ==================================================
        DATE + TIME
     ================================================== */
-
     function setDate() {
+      const now = new Date();
+      const dateOptions = { weekday: "long", day: "numeric", month: "long", year: "numeric" };
+      const dateText = now.toLocaleDateString("th-TH", dateOptions);
+      const timeText = now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
-      const now =
-        new Date();
-
-
-      const dateOptions = {
-
-        weekday: "long",
-
-        day: "numeric",
-
-        month: "long",
-
-        year: "numeric"
-
-      };
-
-
-      const dateText =
-        now.toLocaleDateString(
-          "th-TH",
-          dateOptions
-        );
-
-
-      const timeText =
-        now.toLocaleTimeString(
-          "th-TH",
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-          }
-        );
-
-
-      document.getElementById(
-        "todayDate"
-      ).textContent =
-        dateText +
-        " · " +
-        timeText +
-        " น.";
+      document.getElementById("todayDate").textContent = dateText + " · " + timeText + " น.";
     }
 
-
-
-    /* ==================================================
-       FORMAT DATE FOR LETTER
-    ================================================== */
-
-    function formatDateTime(timestamp) {
-
-      const date =
-        new Date(timestamp);
-
-
-      const dateText =
-        date.toLocaleDateString(
-          "th-TH",
-          {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-          }
-        );
-
-
-      const timeText =
-        date.toLocaleTimeString(
-          "th-TH",
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-          }
-        );
-
-
-      return (
-        dateText +
-        " เวลา " +
-        timeText +
-        " น."
-      );
-
+    function formatDateTime(isoString) {
+      if (!isoString) return "";
+      const date = new Date(isoString);
+      const dateText = date.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+      const timeText = date.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      return dateText + " เวลา " + timeText + " น.";
     }
 
-
-
     /* ==================================================
-       SAVE JOURNAL
+       SAVE JOURNAL (ส่งขึ้นออนไลน์)
     ================================================== */
-
-    function saveJournal() {
-
-      const textarea =
-        document.getElementById(
-          "journalText"
-        );
-
-
-      const text =
-        textarea.value;
-
-
-      /*
-        ไม่ตัดช่องว่าง
-        ไม่ trim
-        ไม่แก้ข้อความ
-        เพื่อรักษาข้อความตามที่พิมพ์
-      */
+    window.saveJournal = async function() {
+      const textarea = document.getElementById("journalText");
+      const text = textarea.value;
 
       if (text.length === 0) {
-
         textarea.focus();
-
         return;
-
       }
-
-
-      /*
-        จำกัดไม่เกิน 2000 ตัวอักษร
-      */
-
       if (text.length > 2000) {
-
-        alert(
-          "ข้อความยาวเกิน 2000 ตัวอักษรนะ 🐽"
-        );
-
+        alert("ข้อความยาวเกิน 2000 ตัวอักษรนะ 🐽");
         return;
-
       }
 
+      try {
+        await addDoc(collection(db, "letters"), {
+          content: text,
+          createdAt: serverTimestamp(),
+          comments: []
+        });
 
-      const letters =
-        getLetters();
+        textarea.value = "";
+        playEnvelopeAnimation();
 
-
-      const newLetter = {
-
-        id:
-          Date.now().toString() +
-          Math.random()
-            .toString(36)
-            .substring(2),
-
-        content:
-          text,
-
-        createdAt:
-          new Date().toISOString(),
-
-        comments: []
-
-      };
-
-
-      /*
-        เพิ่มจดหมายใหม่
-        โดยไม่แตะต้องจดหมายเก่า
-      */
-
-      letters.push(
-        newLetter
-      );
-
-
-      saveLetters(
-        letters
-      );
-
-
-      /*
-        ล้างช่องเขียน
-      */
-
-      textarea.value = "";
-
-
-      /*
-        แสดง animation
-      */
-
-      playEnvelopeAnimation();
-
-
-      /*
-        โหลดรายการจดหมายใหม่
-      */
-
-      renderLetters();
-
-
-      /*
-        popup หลัง animation
-      */
-
-      setTimeout(() => {
-
-        document.getElementById(
-          "savedPopup"
-        ).style.display = "flex";
-
-      }, 1850);
-
+        setTimeout(() => {
+          document.getElementById("savedPopup").style.display = "flex";
+        }, 1850);
+      } catch (e) {
+        console.error("Error adding document: ", e);
+        alert("เกิดข้อผิดพลาดในการส่งจดหมาย");
+      }
     }
-
-
 
     /* ==================================================
        ENVELOPE ANIMATION
     ================================================== */
-
     function playEnvelopeAnimation() {
-
-      const animation =
-        document.getElementById(
-          "envelopeAnimation"
-        );
-
-
-      const envelope =
-        document.getElementById(
-          "flyingEnvelope"
-        );
-
-
-      /*
-        reset animation
-      */
+      const animation = document.getElementById("envelopeAnimation");
+      const envelope = document.getElementById("flyingEnvelope");
 
       envelope.style.animation = "none";
-
       void envelope.offsetWidth;
+      envelope.style.animation = "flyToMail 1.8s cubic-bezier(.2,.8,.3,1) forwards";
 
-      envelope.style.animation =
-        "flyToMail 1.8s cubic-bezier(.2,.8,.3,1) forwards";
-
-
-      animation.style.display =
-        "block";
-
-
+      animation.style.display = "block";
       setTimeout(() => {
-
-        animation.style.display =
-          "none";
-
+        animation.style.display = "none";
       }, 1900);
-
     }
-
-
 
     /* ==================================================
        RENDER LETTERS
     ================================================== */
-
     function renderLetters() {
-
-      const list =
-        document.getElementById(
-          "lettersList"
-        );
-
-
-      const letters =
-        getLetters();
-
-
+      const list = document.getElementById("lettersList");
       list.innerHTML = "";
 
-
-      if (letters.length === 0) {
-
-        list.innerHTML = `
-          <div class="empty-mail">
-            ยังไม่มีจดหมายเย้ยย ♡
-          </div>
-        `;
-
+      if (lettersCache.length === 0) {
+        list.innerHTML = `<div class="empty-mail">ยังไม่มีจดหมายเย้ยย ♡</div>`;
         return;
-
       }
 
+      lettersCache.forEach(letter => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "letter-swipe-wrapper";
 
-      /*
-        จดหมายใหม่อยู่ด้านบน
-      */
+        const actions = document.createElement("div");
+        actions.className = "letter-actions";
 
-      const sortedLetters =
-        [...letters].reverse();
+        const editButton = document.createElement("button");
+        editButton.className = "letter-action edit-action";
+        editButton.innerHTML = "✏";
+        editButton.title = "แก้ไข";
+        editButton.onclick = function(event) {
+          event.stopPropagation();
+          openEditModal(letter.id);
+        };
 
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "letter-action delete-action";
+        deleteButton.innerHTML = "🗑️";
+        deleteButton.title = "ลบ";
+        deleteButton.onclick = function(event) {
+          event.stopPropagation();
+          deleteLetterById(letter.id);
+        };
 
-      sortedLetters.forEach(
-        letter => {
+        actions.appendChild(editButton);
+        actions.appendChild(deleteButton);
 
-          /* =========================
-             SWIPE LETTER
-          ========================= */
-          const wrapper =
-            document.createElement("div");
-          wrapper.className =
-            "letter-swipe-wrapper";
+        const button = document.createElement("button");
+        button.className = "letter-card";
+        button.onclick = () => {
+          if (wrapper.classList.contains("swiped")) {
+            wrapper.classList.remove("swiped");
+            return;
+          }
+          openLetter(letter.id);
+        };
 
-          /* =========================
-             ACTION BUTTONS
-          ========================= */
-          const actions =
-            document.createElement("div");
-          actions.className =
-            "letter-actions";
+        const icon = document.createElement("div");
+        icon.className = "letter-icon";
+        icon.textContent = "💌";
 
-          /* ปุ่มแก้ไข */
-          const editButton =
-            document.createElement("button");
-          editButton.className =
-            "letter-action edit-action";
-          editButton.innerHTML =
-            "✏️";
-          editButton.title =
-            "แก้ไข";
-          editButton.onclick =
-            function(event) {
-              event.stopPropagation();
-              openEditModal(
-                letter.id
-              );
-            };
+        const info = document.createElement("div");
+        info.className = "letter-info";
 
-          /* ปุ่มลบ */
-          const deleteButton =
-            document.createElement("button");
-          deleteButton.className =
-            "letter-action delete-action";
-          deleteButton.innerHTML =
-            "🗑️";
-          deleteButton.title =
-            "ลบ";
-          deleteButton.onclick =
-            function(event) {
-              event.stopPropagation();
-              deleteLetterById(
-                letter.id
-              );
-            };
+        const preview = document.createElement("div");
+        preview.className = "letter-preview";
+        preview.textContent = letter.content;
 
-          actions.appendChild(
-            editButton
-          );
-          actions.appendChild(
-            deleteButton
-          );
+        const time = document.createElement("div");
+        time.className = "letter-time";
+        time.textContent = formatDateTime(letter.createdAt);
 
-          /* =========================
-             LETTER BUTTON
-          ========================= */
-          const button =
-            document.createElement(
-              "button"
-            );
+        info.appendChild(preview);
+        info.appendChild(time);
+        button.appendChild(icon);
+        button.appendChild(info);
 
+        wrapper.appendChild(actions);
+        wrapper.appendChild(button);
+        list.appendChild(wrapper);
 
-          button.className =
-            "letter-card";
+        // Touch Swipe
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
 
+        button.addEventListener("touchstart", function(event) {
+          startX = event.touches[0].clientX;
+          isDragging = true;
+        }, { passive: true });
 
-          button.onclick =
-            () => {
-              /*
-                ถ้าปัดอยู่ ให้ปิดก่อน
-              */
-              if (
-                wrapper.classList.contains(
-                  "swiped"
-                )
-              ) {
-                wrapper.classList.remove(
-                  "swiped"
-                );
-                return;
-              }
-              openLetter(
-                letter.id
-              );
-            };
+        button.addEventListener("touchmove", function(event) {
+          if (!isDragging) return;
+          currentX = event.touches[0].clientX;
+          const distance = currentX - startX;
+          if (distance < -20) {
+            button.style.transform = `translateX(${Math.max(distance, -145)}px)`;
+          }
+        }, { passive: true });
 
-
-          const icon =
-            document.createElement(
-              "div"
-            );
-
-
-          icon.className =
-            "letter-icon";
-
-
-          icon.textContent =
-            "💌";
-
-
-          const info =
-            document.createElement(
-              "div"
-            );
-
-
-          info.className =
-            "letter-info";
-
-
-          const preview =
-            document.createElement(
-              "div"
-            );
-
-
-          preview.className =
-            "letter-preview";
-
-
-          /*
-            แสดงตัวอย่างโดยไม่แก้ข้อความจริง
-          */
-
-          preview.textContent =
-            letter.content;
-
-
-          const time =
-            document.createElement(
-              "div"
-            );
-
-
-          time.className =
-            "letter-time";
-
-
-          time.textContent =
-            formatDateTime(
-              letter.createdAt
-            );
-
-
-          info.appendChild(
-            preview
-          );
-
-
-          info.appendChild(
-            time
-          );
-
-
-          button.appendChild(
-            icon
-          );
-
-
-          button.appendChild(
-            info
-          );
-
-
-          wrapper.appendChild(
-            actions
-          );
-          wrapper.appendChild(
-            button
-          );
-          list.appendChild(
-            wrapper
-          );
-
-
-          /* ==================================================
-             TOUCH SWIPE
-          ================================================== */
-          let startX = 0;
-          let currentX = 0;
-          let isDragging = false;
-
-          button.addEventListener(
-            "touchstart",
-            function(event) {
-              startX =
-                event.touches[0].clientX;
-              isDragging = true;
-            },
-            { passive: true }
-          );
-
-          button.addEventListener(
-            "touchmove",
-            function(event) {
-              if (!isDragging) return;
-              currentX =
-                event.touches[0].clientX;
-              const distance =
-                currentX - startX;
-              /*
-                ปัดซ้ายเท่านั้น
-              */
-              if (
-                distance < -20
-              ) {
-                button.style.transform =
-                  `translateX(${Math.max(
-                    distance,
-                    -145
-                  )}px)`;
-              }
-            },
-            { passive: true }
-          );
-
-          button.addEventListener(
-            "touchend",
-            function() {
-              isDragging = false;
-              const distance =
-                currentX - startX;
-              if (
-                distance < -60
-              ) {
-                wrapper.classList.add(
-                  "swiped"
-                );
-              } else {
-                wrapper.classList.remove(
-                  "swiped"
-                );
-              }
-              button.style.transform =
-                "";
-            }
-          );
-
-        }
-      );
-
+        button.addEventListener("touchend", function() {
+          isDragging = false;
+          const distance = currentX - startX;
+          if (distance < -60) {
+            wrapper.classList.add("swiped");
+          } else {
+            wrapper.classList.remove("swiped");
+          }
+          button.style.transform = "";
+        });
+      });
     }
-
-
 
     /* ==================================================
        OPEN LETTER
     ================================================== */
+    window.openLetter = function(id) {
+      const letter = lettersCache.find(item => item.id === id);
+      if (!letter) return;
 
-    function openLetter(id) {
+      currentLetterId = id;
 
-      const letters =
-        getLetters();
+      document.getElementById("letterMeta").textContent = "ส่งมาเมื่อ " + formatDateTime(letter.createdAt);
+      document.getElementById("letterContent").textContent = letter.content;
+      document.getElementById("commentText").value = "";
 
-
-      const letter =
-        letters.find(
-          item =>
-            item.id === id
-        );
-
-
-      if (!letter) {
-        return;
-      }
-
-
-      currentLetterId =
-        id;
-
-
-      document.getElementById(
-        "letterMeta"
-      ).textContent =
-        "ส่งมาเมื่อ " +
-        formatDateTime(
-          letter.createdAt
-        );
-
-
-      /*
-        textContent + white-space: pre-wrap
-        ทำให้ข้อความที่พิมพ์มา
-        แสดงตรงตามต้นฉบับ
-      */
-
-      document.getElementById(
-        "letterContent"
-      ).textContent =
-        letter.content;
-
-
-      document.getElementById(
-        "commentText"
-      ).value = "";
-
-
-      renderComments(
-        letter
-      );
-
-
-      document.getElementById(
-        "letterModal"
-      ).style.display =
-        "flex";
-
+      renderComments(letter);
+      document.getElementById("letterModal").style.display = "flex";
     }
 
-
-
-    /* ==================================================
-       CLOSE LETTER
-    ================================================== */
-
-    function closeLetter() {
-
-      document.getElementById(
-        "letterModal"
-      ).style.display =
-        "none";
-
-
-      currentLetterId =
-        null;
-
+    window.closeLetter = function() {
+      document.getElementById("letterModal").style.display = "none";
+      currentLetterId = null;
     }
-
-
 
     /* ==================================================
        RENDER COMMENTS
     ================================================== */
-
-    function renderComments(
-      letter
-    ) {
-
-      const list =
-        document.getElementById(
-          "commentsList"
-        );
-
-
+    function renderComments(letter) {
+      const list = document.getElementById("commentsList");
       list.innerHTML = "";
 
-
-      if (
-        !letter.comments ||
-        letter.comments.length === 0
-      ) {
-
-        list.innerHTML = `
-          <div class="no-comments">
-            ยังไม่มี comment ♡
-          </div>
-        `;
-
+      if (!letter.comments || letter.comments.length === 0) {
+        list.innerHTML = `<div class="no-comments">ยังไม่มี comment ♡</div>`;
         return;
-
       }
 
+      letter.comments.forEach(comment => {
+        const item = document.createElement("div");
+        item.className = "comment-item";
 
-      letter.comments.forEach(
-        comment => {
+        const time = document.createElement("div");
+        time.className = "comment-time";
+        time.textContent = comment.createdAt;
 
-          const item =
-            document.createElement(
-              "div"
-            );
+        const content = document.createElement("div");
+        content.className = "comment-content";
+        content.textContent = comment.content;
 
-
-          item.className =
-            "comment-item";
-
-
-          const time =
-            document.createElement(
-              "div"
-            );
-
-
-          time.className =
-            "comment-time";
-
-
-          time.textContent =
-            formatDateTime(
-              comment.createdAt
-            );
-
-
-          const content =
-            document.createElement(
-              "div"
-            );
-
-
-          content.className =
-            "comment-content";
-
-
-          content.textContent =
-            comment.content;
-
-
-          item.appendChild(
-            time
-          );
-
-
-          item.appendChild(
-            content
-          );
-
-
-          list.appendChild(
-            item
-          );
-
-        }
-      );
-
+        item.appendChild(time);
+        item.appendChild(content);
+        list.appendChild(item);
+      });
     }
-
-
 
     /* ==================================================
-       ADD COMMENT
+       ADD COMMENT (เพิ่มคอมเมนต์แบบออนไลน์)
     ================================================== */
+    window.addComment = async function() {
+      if (!currentLetterId) return;
 
-    function addComment() {
-
-      if (!currentLetterId) {
-        return;
-      }
-
-
-      const textarea =
-        document.getElementById(
-          "commentText"
-        );
-
-
-      const text =
-        textarea.value;
-
-
-      /*
-        ไม่ trim เพื่อรักษาข้อความ
-      */
+      const textarea = document.getElementById("commentText");
+      const text = textarea.value;
 
       if (text.length === 0) {
-
         textarea.focus();
-
         return;
-
       }
-
-
       if (text.length > 2000) {
-
-        alert(
-          "comment ยาวเกิน 2000 ตัวอักษรนะ 🐽"
-        );
-
-        return;
-
-      }
-
-
-      const letters =
-        getLetters();
-
-
-      const letter =
-        letters.find(
-          item =>
-            item.id ===
-            currentLetterId
-        );
-
-
-      if (!letter) {
+        alert("comment ยาวเกิน 2000 ตัวอักษรนะ 🐽");
         return;
       }
 
+      try {
+        const letterRef = doc(db, "letters", currentLetterId);
+        const timeNow = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
 
-      if (!letter.comments) {
+        await updateDoc(letterRef, {
+          comments: arrayUnion({
+            content: text,
+            createdAt: timeNow
+          })
+        });
 
-        letter.comments = [];
-
+        textarea.value = "";
+      } catch (e) {
+        console.error("Error adding comment: ", e);
       }
-
-
-      letter.comments.push({
-
-        id:
-          Date.now().toString() +
-          Math.random()
-            .toString(36)
-            .substring(2),
-
-        content:
-          text,
-
-        createdAt:
-          new Date().toISOString()
-
-      });
-
-
-      saveLetters(
-        letters
-      );
-
-
-      textarea.value = "";
-
-
-      renderComments(
-        letter
-      );
-
     }
-
-
 
     /* ==================================================
        DELETE LETTER
-       comment จะถูกลบไปพร้อมกันโดยอัตโนมัติ
     ================================================== */
+    window.deleteCurrentLetter = async function() {
+      if (!currentLetterId) return;
 
-    function deleteCurrentLetter() {
+      if (!confirm("แน่ใจนะว่าจะลบจดหมายนี้?\n\ncomment ทั้งหมดในจดหมายนี้จะถูกลบไปด้วย")) return;
 
-      if (!currentLetterId) {
-        return;
-      }
-
-
-      const confirmed =
-        confirm(
-          "แน่ใจนะว่าจะลบจดหมายนี้?\n\ncomment ทั้งหมดในจดหมายนี้จะถูกลบไปด้วย"
-        );
-
-
-      if (!confirmed) {
-        return;
-      }
-
-
-      let letters =
-        getLetters();
-
-
-      /*
-        ลบทั้ง letter
-        comments ที่อยู่ข้างในจึงหายไปด้วย
-      */
-
-      letters =
-        letters.filter(
-          letter =>
-            letter.id !==
-            currentLetterId
-        );
-
-
-      saveLetters(
-        letters
-      );
-
-
-      closeLetter();
-
-
-      renderLetters();
-
-    }
-
-
-
-    /* ==================================================
-       CLOSE POPUP
-    ================================================== */
-
-    function closePopup() {
-
-      document.getElementById(
-        "savedPopup"
-      ).style.display =
-        "none";
-
-    }
-
-
-
-    /* ==================================================
-       GO HOME
-    ================================================== */
-
-    function goHome() {
-
-      document.getElementById(
-        "blogScreen"
-      ).style.display =
-        "none";
-
-
-      document.getElementById(
-        "homeScreen"
-      ).style.display =
-        "flex";
-
-    }
-
-
-
-    /* ==================================================
-       CLICK OUTSIDE LETTER
-    ================================================== */
-
-    document
-      .getElementById("letterModal")
-      .addEventListener(
-        "click",
-        function(event) {
-
-          if (
-            event.target ===
-            this
-          ) {
-
-            closeLetter();
-
-          }
-
-        }
-      );
-
-
-
-    /* ==================================================
-       ESC
-    ================================================== */
-
-    document.addEventListener(
-      "keydown",
-      function(event) {
-
-        if (
-          event.key === "Escape"
-        ) {
-
-          closeLetter();
-
-          closePopup();
-          closeEditModal();
-
-        }
-
-      }
-    );
-
-
-
-    /* ==================================================
-       DELETE LETTER BY ID
-    ================================================== */
-    function deleteLetterById(id) {
-      const confirmed =
-        confirm(
-          "แน่ใจนะว่าจะลบจดหมายนี้?\n\ncomment ทั้งหมดในจดหมายนี้จะถูกลบไปด้วย"
-        );
-      if (!confirmed) {
-        return;
-      }
-      let letters =
-        getLetters();
-      /*
-        ลบทั้งจดหมาย
-        ดังนั้น comments ที่อยู่ข้างใน
-        จะถูกลบไปพร้อมกันอัตโนมัติ
-      */
-      letters =
-        letters.filter(
-          letter =>
-            letter.id !== id
-        );
-      saveLetters(
-        letters
-      );
-      /*
-        ถ้าจดหมายที่กำลังเปิดอยู่
-        เป็นฉบับเดียวกับที่ลบ
-      */
-      if (
-        currentLetterId === id
-      ) {
+      try {
+        await deleteDoc(doc(db, "letters", currentLetterId));
         closeLetter();
+      } catch (e) {
+        console.error("Error deleting document: ", e);
       }
-      renderLetters();
     }
 
+    window.deleteLetterById = async function(id) {
+      if (!confirm("แน่ใจนะว่าจะลบจดหมายนี้?\n\ncomment ทั้งหมดในจดหมายนี้จะถูกลบไปด้วย")) return;
+
+      try {
+        await deleteDoc(doc(db, "letters", id));
+        if (currentLetterId === id) {
+          closeLetter();
+        }
+      } catch (e) {
+        console.error("Error deleting document: ", e);
+      }
+    }
 
     /* ==================================================
-       OPEN EDIT MODAL
+       EDIT LETTER MODAL
     ================================================== */
-    let editingLetterId = null;
-    function openEditModal(id) {
-      const letters =
-        getLetters();
-      const letter =
-        letters.find(
-          item =>
-            item.id === id
-        );
-      if (!letter) {
-        return;
-      }
-      editingLetterId =
-        id;
-      /*
-        เอาข้อความเดิมมาใส่
-        โดยไม่ trim หรือแก้ไข
-      */
-      document.getElementById(
-        "editLetterText"
-      ).value =
-        letter.content;
-      document.getElementById(
-        "editModal"
-      ).style.display =
-        "flex";
+    window.openEditModal = function(id) {
+      const letter = lettersCache.find(item => item.id === id);
+      if (!letter) return;
+
+      editingLetterId = id;
+      document.getElementById("editLetterText").value = letter.content;
+      document.getElementById("editModal").style.display = "flex";
+
       setTimeout(() => {
-        document.getElementById(
-          "editLetterText"
-        ).focus();
+        document.getElementById("editLetterText").focus();
       }, 100);
     }
 
+    window.saveEditedLetter = async function() {
+      if (!editingLetterId) return;
 
-    /* ==================================================
-       SAVE EDIT
-    ================================================== */
-    function saveEditedLetter() {
-      if (!editingLetterId) {
-        return;
-      }
-      const textarea =
-        document.getElementById(
-          "editLetterText"
-        );
-      const newText =
-        textarea.value;
-      /*
-        ไม่ trim
-        เพื่อรักษาข้อความตามที่พิมพ์
-      */
-      if (
-        newText.length === 0
-      ) {
+      const textarea = document.getElementById("editLetterText");
+      const newText = textarea.value;
+
+      if (newText.length === 0) {
         textarea.focus();
         return;
       }
-      if (
-        newText.length > 2000
-      ) {
-        alert(
-          "ข้อความยาวเกิน 2000 ตัวอักษรนะ 🐽"
-        );
+      if (newText.length > 2000) {
+        alert("ข้อความยาวเกิน 2000 ตัวอักษรนะ 🐽");
         return;
       }
-      const letters =
-        getLetters();
-      const letter =
-        letters.find(
-          item =>
-            item.id ===
-            editingLetterId
-        );
-      if (!letter) {
-        return;
-      }
-      /*
-        แก้เฉพาะ content
-        วันที่และ comment เดิม
-        จะยังอยู่เหมือนเดิม
-      */
-      letter.content =
-        newText;
-      saveLetters(
-        letters
-      );
-      closeEditModal();
-      renderLetters();
-      /*
-        ถ้ากำลังเปิดจดหมายฉบับนี้อยู่
-        ให้ refresh เนื้อหาด้วย
-      */
-      if (
-        currentLetterId ===
-        editingLetterId
-      ) {
-        document.getElementById(
-          "letterContent"
-        ).textContent =
-          newText;
+
+      try {
+        const letterRef = doc(db, "letters", editingLetterId);
+        await updateDoc(letterRef, {
+          content: newText
+        });
+
+        closeEditModal();
+      } catch (e) {
+        console.error("Error updating document: ", e);
       }
     }
 
-
-    /* ==================================================
-       CLOSE EDIT MODAL
-    ================================================== */
-    function closeEditModal() {
-      document.getElementById(
-        "editModal"
-      ).style.display =
-        "none";
-      editingLetterId =
-        null;
+    window.closeEditModal = function() {
+      document.getElementById("editModal").style.display = "none";
+      editingLetterId = null;
     }
 
+    window.closePopup = function() {
+      document.getElementById("savedPopup").style.display = "none";
+    }
 
-    /* ==================================================
-       CLICK OUTSIDE EDIT MODAL
-    ================================================== */
-    document
-      .getElementById("editModal")
-      .addEventListener(
-        "click",
-        function(event) {
-          if (
-            event.target ===
-            this
-          ) {
-            closeEditModal();
-          }
-        }
-      );
+    window.goHome = function() {
+      document.getElementById("blogScreen").style.display = "none";
+      document.getElementById("homeScreen").style.display = "flex";
+    }
 
+    document.getElementById("letterModal").addEventListener("click", function(event) {
+      if (event.target === this) {
+        closeLetter();
+      }
+    });
 
+    document.getElementById("editModal").addEventListener("click", function(event) {
+      if (event.target === this) {
+        closeEditModal();
+      }
+    });
 
-    /* ==================================================
-       INITIAL LOAD
-    ================================================== */
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") {
+        closeLetter();
+        closePopup();
+        closeEditModal();
+      }
+    });
 
     setDate();
-
   </script>
 
 </body>
