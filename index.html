@@ -269,16 +269,15 @@ textarea{min-height:230px}
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  /* 🔴🔴🔴 แก้ตรงนี้: ใส่ค่าจริงจาก Firebase Console
-     Project settings (รูปเฟือง) > General > Your apps > Web app > SDK setup and configuration > Config */
-  const firebaseConfig = {
-    apiKey: "ใส่ของจริง",
-    authDomain: "ใส่ของจริง",
-    projectId: "ใส่ของจริง",
-    storageBucket: "ใส่ของจริง",
-    messagingSenderId: "ใส่ของจริง",
-    appId: "ใส่ของจริง"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyBkxDeR-IgljHiFbczQOlvUDtoz7z5xxh4",
+  authDomain: "jaokanjump.firebaseapp.com",
+  projectId: "jaokanjump",
+  storageBucket: "jaokanjump.firebasestorage.app",
+  messagingSenderId: "137877435934",
+  appId: "1:137877435934:web:3160d245dd411917e2200f",
+  measurementId: "G-1HQ7045XKF"
+};
 
   const configMissing = Object.values(firebaseConfig).some(v => String(v).includes("ใส่ของจริง"));
 
